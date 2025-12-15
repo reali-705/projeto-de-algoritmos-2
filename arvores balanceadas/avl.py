@@ -1,10 +1,17 @@
-"""Módulo que implementa uma árvore AVL."""
+"""Estruturas e operações de Árvore AVL.
+
+Extende a BST com balanceamento automático por rotações após inserções
+ou remoções, garantindo altura O(log n).
+"""
 
 from binaria_de_busca import NoBST, ArvoreBST
 
 
 class NoAVL(NoBST):
-    """No da árvore AVL."""
+    """Nó de uma Árvore AVL.
+
+    Herda de ``NoBST`` e adiciona `altura` e `fator_balanceamento`.
+    """
 
     def __init__(self, chave: int):
         super().__init__(chave)
@@ -23,12 +30,22 @@ class NoAVL(NoBST):
 
 
 class ArvoreAVL(ArvoreBST):
-    """Representa uma árvore AVL."""
+    """Árvore AVL balanceada por rotações.
+
+    Mantém |fator_balanceamento| <= 1 para todos os nós.
+    Usa ``NoAVL`` como tipo de nó e as rotações herdadas da BST,
+    com atualização de altura/fator a cada ajuste.
+    """
 
     def __init__(self):
         super().__init__(NoAVL)
 
     def _rotacao_direita(self, no_atual: NoAVL) -> None:
+        """Rotação à direita com atualização de altura/FB.
+
+        Args:
+            no_atual (NoAVL): Nó pivô da rotação.
+        """
         novo_pai = no_atual.esquerda
         super()._rotacao_direita(no_atual)
         no_atual.atualizar()
@@ -36,6 +53,11 @@ class ArvoreAVL(ArvoreBST):
             novo_pai.atualizar()
 
     def _rotacao_esquerda(self, no_atual: NoAVL) -> None:
+        """Rotação à esquerda com atualização de altura/FB.
+
+        Args:
+            no_atual (NoAVL): Nó pivô da rotação.
+        """
         novo_pai = no_atual.direita
         super()._rotacao_esquerda(no_atual)
         no_atual.atualizar()
@@ -43,7 +65,11 @@ class ArvoreAVL(ArvoreBST):
             novo_pai.atualizar()
 
     def _reequilibrar(self, no: NoAVL) -> None:
-        """Reequilibra a árvore a partir do nó fornecido."""
+        """Reequilibra subárvores de baixo para cima a partir de ``no``.
+
+        Aplica rotações simples ou duplas nos casos LL/LR e RR/RL,
+        atualizando altura e fator de balanceamento após cada rotação.
+        """
         while no:
             no.atualizar()
 
@@ -59,13 +85,22 @@ class ArvoreAVL(ArvoreBST):
 
             no = no.pai
 
-    def inserir(self, chave) -> None:
-        """Insere um valor na árvore AVL e reequilibra a árvore se necessário."""
-        self._reequilibrar(super()._inserir(chave))
+    def inserir(self, chave: int) -> None:
+        """Insere uma ``chave`` e reequilibra a árvore se necessário.
 
-    def remover(self, chave) -> None:
-        """Remove um valor da árvore AVL e reequilibra a árvore se necessário."""
+        Args:
+            chave (int): Chave a inserir.
+        """
+        novo_no = super()._inserir(chave)
+        if novo_no:
+            self._reequilibrar(novo_no)
+
+    def remover(self, chave: int) -> None:
+        """Remove a ``chave`` e reequilibra a árvore se necessário.
+
+        Args:
+            chave (int): Chave a remover.
+        """
         pai_do_removido = super()._remover(chave)
         if pai_do_removido:
-            # Reequilibra a partir do pai do nó removido
             self._reequilibrar(pai_do_removido)
